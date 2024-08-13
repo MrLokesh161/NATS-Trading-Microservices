@@ -1,0 +1,29 @@
+version: '3'
+services:
+  nats:
+    image: nats:latest
+    ports:
+      - "4222:4222"
+      - "6222:6222"
+      - "8222:8222"
+    container_name: nats-server
+  gateway:
+    build: ./gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - nats
+  order-service:
+    build: ./order-service
+    depends_on:
+      - nats
+  broker-adapter:
+    build: ./broker-adapter
+    depends_on:
+      - nats
+  trade-stream-service:
+    build: ./trade-stream-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - nats
