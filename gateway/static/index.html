@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Logs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            width: 90%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #444;
+        }
+        .log-section {
+            margin-top: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+        .log-section h2 {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px;
+            margin: 0;
+            font-size: 1.5em;
+        }
+        .log {
+            padding: 15px;
+            border-top: 1px solid #ddd;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 300px;
+        }
+        #gateway-log-content {
+            background-color: #e9f7ff;
+        }
+        #order-log {
+            background-color: #f9f9f9;
+        }
+        #broker-log {
+            background-color: #f4f9f4;
+        }
+        #trade-log {
+            background-color: #fff4e6;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Service Logs and Updates</h1>
+        
+        <div class="log-section" id="gateway-log">
+            <h2>Gateway Log</h2>
+            <div class="log" id="gateway-log-content"></div>
+        </div>
+        
+        <div class="log-section" id="order-service-log">
+            <h2>Order Service Log</h2>
+            <div class="log" id="order-log"></div>
+        </div>
+        
+        <div class="log-section" id="broker-adapter-log">
+            <h2>Broker Adapter Log</h2>
+            <div class="log" id="broker-log"></div>
+        </div>
+
+        <div class="log-section" id="trade-stream-service-log">
+            <h2>Trade Stream Service Log</h2>
+            <div class="log" id="trade-log"></div>
+        </div>
+    </div>
+
+    <script>
+        function connectWebSocket(url, logElementId) {
+            var socket = new WebSocket(url);
+            var logElement = document.getElementById(logElementId);
+
+            socket.onmessage = function(event) {
+                logElement.textContent += event.data + '\n';
+                logElement.scrollTop = logElement.scrollHeight; // Auto scroll to the bottom
+            };
+
+            socket.onerror = function(event) {
+                logElement.innerHTML += '<span class="error">Error: ' + (event.message || 'Unknown error') + '</span>\n';
+                logElement.scrollTop = logElement.scrollHeight; // Auto scroll to the bottom
+            };
+
+            socket.onopen = function() {
+                logElement.textContent += 'WebSocket connected to ' + url + '\n';
+                logElement.scrollTop = logElement.scrollHeight; // Auto scroll to the bottom
+            };
+
+            socket.onclose = function() {
+                logElement.textContent += 'WebSocket connection closed\n';
+                logElement.scrollTop = logElement.scrollHeight; // Auto scroll to the bottom
+            };
+        }
+
+// Connect to WebSocket endpoints for each service
+connectWebSocket('ws://localhost:8080/ws', 'gateway-log-content');
+connectWebSocket('ws://localhost:8081/ws', 'order-log');
+connectWebSocket('ws://localhost:8082/ws', 'broker-log');
+connectWebSocket('ws://localhost:8083/ws', 'trade-log');
+
+    </script>
+</body>
+</html>
