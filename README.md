@@ -139,8 +139,3 @@ This will build and start all the services along with the NATS server.
 - **Gateway Service API**: `http://localhost:8080/order`
 - **Trade Stream WebSocket**: `ws://localhost:8081/ws`
 - **NATS Dashboard** (if enabled): `http://localhost:8222`
-
-## Conclusion
-
-This project demonstrates a microservices architecture using Go, NATS, and WebSockets. Each service operates independently and communicates via NATS, enabling a scalable and resilient system for handling trading operations.
-
