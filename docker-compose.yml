@@ -14,7 +14,7 @@ services:
     depends_on:
       - nats
   order-service:
-    build: ./order-service
+    build: ./service-order
     depends_on:
       - nats
   broker-adapter:

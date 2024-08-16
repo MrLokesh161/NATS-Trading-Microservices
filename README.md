@@ -1,33 +1,35 @@
-Microservices Trading System
+# Microservices Trading System
 
-# Project Overview
+## Project Overview
 
-This project consists of multiple microservices that work together to handle trading operations. The architecture includes:
+This project is a microservices-based trading system composed of several services that communicate through NATS. The architecture includes:
 
-- **Gateway Service**: Provides an API for order creation and serves as the entry point for client requests.
+- **Gateway Service**: An API gateway that accepts client order requests and interacts with NATS and WebSocket clients.
 - **Order Service**: Publishes order creation events to NATS.
-- **Trade Stream Service**: Subscribes to order completion events and provides real-time updates via WebSocket.
-- **Broker Service**: Processes and logs order completion events.
+- **Trade Stream Service**: Listens for order completion events and provides real-time updates via WebSocket.
+- **Broker Service**: Processes, logs, and acknowledges order completion events.
 
 ## Prerequisites
 
-Make sure you have the following installed:
+Before getting started, ensure you have the following installed:
 
-- Go 1.20 or higher
-- Docker (for running NATS server)
+- **Go 1.20 or higher**
+- **Docker** (to run the NATS server)
 
-Also, ensure that a NATS server instance is running.
+Make sure a NATS server instance is running before you start the services.
 
 ## Getting Started
 
-1. Clone the Repository
+### 1. Clone the Repository
+
+Clone the repository to your local machine:
 
 ```sh
 git clone <repository-url>
 cd <repository-directory>
 ```
 
-2. Set Up the Go Modules
+### 2. Set Up Go Modules
 
 Navigate to each service directory and initialize the Go modules:
 
@@ -45,19 +47,21 @@ cd ../broker-service
 go mod tidy
 ```
 
-3. Run NATS Server
+### 3. Run the NATS Server
 
-You can run a NATS server using Docker. Use the following command to start it:
+Run a NATS server using Docker. Use the following command:
 
 ```sh
-docker run -d -p 4222:4222 nats:latest
+docker run -d -p 4222:4222 -p 6222:6222 -p 8222:8222 --name nats-server nats:latest
 ```
 
-4. Build and Run Each Service
+This command starts the NATS server and maps the standard ports.
 
-### Gateway Service
+### 4. Build and Run Each Service
 
-The Gateway Service listens for HTTP requests and interacts with NATS and WebSocket clients.
+#### Gateway Service
+
+The Gateway Service serves as the entry point, accepting HTTP requests and interacting with NATS and WebSocket clients.
 
 To run the Gateway Service:
 
@@ -68,11 +72,11 @@ go run main.go
 
 Endpoints:
 
-- `POST /order`: Accepts order requests and publishes them to NATS.
+- `POST /order`: Accepts order requests, which are then published to NATS.
 
-### Order Service
+#### Order Service
 
-The Order Service publishes order creation events to NATS.
+The Order Service listens for order creation events, processes them, and publishes order completion events to NATS.
 
 To run the Order Service:
 
@@ -83,11 +87,12 @@ go run main.go
 
 NATS Subscription:
 
-- Subscribes to `order.created` and publishes to `order.completed`.
+- **Subscribes to:** `order.created`
+- **Publishes to:** `order.completed`
 
-### Trade Stream Service
+#### Trade Stream Service
 
-The Trade Stream Service listens for order completion events and broadcasts them to WebSocket clients.
+The Trade Stream Service listens for order completion events and broadcasts them to connected WebSocket clients.
 
 To run the Trade Stream Service:
 
@@ -98,11 +103,11 @@ go run main.go
 
 WebSocket URL:
 
-- WebSocket URL: `ws://localhost:8080/ws`
+- **WebSocket URL:** `ws://localhost:8081/ws`
 
-### Broker Service
+#### Broker Service
 
-The Broker Service logs order completion events received from NATS.
+The Broker Service processes and logs order completion events received from NATS.
 
 To run the Broker Service:
 
@@ -110,3 +115,32 @@ To run the Broker Service:
 cd broker-service
 go run main.go
 ```
+
+NATS Subscription:
+
+- **Subscribes to:** `order.completed`
+
+## Docker Compose Setup
+
+You can also use Docker Compose to manage and run all the services together with the NATS server. To do so:
+
+1. Ensure Docker is running.
+2. Navigate to the root of the project directory where the `docker-compose.yml` file is located.
+3. Run the following command:
+
+```sh
+docker-compose up --build
+```
+
+This will build and start all the services along with the NATS server.
+
+### Accessing the Services
+
+- **Gateway Service API**: `http://localhost:8080/order`
+- **Trade Stream WebSocket**: `ws://localhost:8081/ws`
+- **NATS Dashboard** (if enabled): `http://localhost:8222`
+
+## Conclusion
+
+This project demonstrates a microservices architecture using Go, NATS, and WebSockets. Each service operates independently and communicates via NATS, enabling a scalable and resilient system for handling trading operations.
+
